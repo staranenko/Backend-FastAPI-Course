@@ -11,12 +11,12 @@ hotels = [
 
 @app.get("/hotels")
 def get_hotels(
-    id: int | None = Query(None),
-    title: str | None = Query(None, description="The tit le of the hotel"),
+    hotel_id: int | None = Query(None),
+    title: str | None = Query(None, description="The title of the hotel"),
 ):
     hotels_ = []
     for hotel in hotels:
-        if id and hotel["id"] != id:
+        if hotel_id and hotel["id"] != hotel_id:
             continue
         if title and hotel["title"] != title:
             continue
@@ -25,7 +25,9 @@ def get_hotels(
 
 
 @app.post("/hotels")
-def create_hotel(title: str = Body(embed=True)):
+def create_hotel(
+        title: str = Body(embed=True)
+):
     global hotels
     hotels.append(
         {
@@ -37,7 +39,9 @@ def create_hotel(title: str = Body(embed=True)):
 
 
 @app.delete("/hotels/{hotel_id}")
-def delete_hotel(hotel_id: int):
+def delete_hotel(
+        hotel_id: int,
+):
     global hotels
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
     print(hotels)
