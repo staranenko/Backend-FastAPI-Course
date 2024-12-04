@@ -38,6 +38,38 @@ def create_hotel(
     return {"success": "OK"}
 
 
+@app.put("/hotels/{hotel_id}")
+def update_hotel(
+    hotel_id: int,
+    title: str = Body(embed=True),
+    name: str = Body(embed=True),
+):
+    global hotels
+    for hotel in hotels:
+        if hotel_id and hotel["id"] != hotel_id:
+            continue
+        hotel["title"] = title
+        hotel["name"] = name
+    return {"success": "OK"}
+
+
+@app.patch("/hotels/{hotel_id}")
+def patch_hotel(
+        hotel_id: int,
+        title: str | None = Body(default=None, embed=True),
+        name: str | None = Body(default=None, embed=True),
+):
+    global hotels
+    for hotel in hotels:
+        if hotel_id and hotel["id"] != hotel_id:
+            continue
+        if title and hotel["title"] != title:
+            hotel["title"] = title
+        if name and hotel["name"] != name:
+            hotel["name"] = name
+    return {"success": "OK"}
+
+
 @app.delete("/hotels/{hotel_id}")
 def delete_hotel(
         hotel_id: int,
