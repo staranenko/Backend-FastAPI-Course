@@ -1,10 +1,12 @@
-from fastapi import Query, Body, APIRouter
+from fastapi import Query, APIRouter, Body
+
+from schemas.hotels import Hotel, HotelPUTH
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 hotels = [
-    {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2, "title": "Dubai", "name": "dubai"},
+    {"id": 1, "  title": "Сочи", "name": "sochi"},
+    {"id": 2, "title": "Дубай", "name": "dubai"},
 ]
 
 
@@ -25,50 +27,52 @@ def get_hotels(
 
 
 @router.post("")
-def create_hotel(
-        title: str = Body(embed=True),
-        name: str = Body(embed=True),
+def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+    "1": {"summary": "Сочи", "value": {
+        "title": "Отель Сочи у моря",
+        "name": "sochi_by_sea",
+    }},
+    "2": {"summary": "Дубай", "value": {
+        "title": "Отель Дубай у моря",
+        "name": "dubai_by_sea",
+    }},
+})
 ):
     global hotels
     hotels.append(
         {
             "id": hotels[-1]["id"] + 1,
-            "title": title,
-            "name": name,
+            "title": hotel_data.title,
+            "name": hotel_data.name,
         }
     )
     return {"success": "OK"}
 
 
 @router.put("/{hotel_id}")
-def update_hotel(
-    hotel_id: int,
-    title: str = Body(embed=True),
-    name: str = Body(embed=True),
-):
+def edit_hotel(hotel_id: int, hotel_data: Hotel):
     global hotels
     for hotel in hotels:
         if hotel_id and hotel["id"] != hotel_id:
             continue
-        hotel["title"] = title
-        hotel["name"] = name
+        hotel["title"] = hotel_data.title
+        hotel["name"] = hotel_data.name
     return {"success": "OK"}
 
 
 @router.patch("/{hotel_id}")
-def patch_hotel(
+def partial_edit_hotel(
         hotel_id: int,
-        title: str | None = Body(default=None, embed=True),
-        name: str | None = Body(default=None, embed=True),
+        hotel_data: HotelPUTH
 ):
     global hotels
     for hotel in hotels:
         if hotel_id and hotel["id"] != hotel_id:
             continue
-        if title and hotel["title"] != title:
-            hotel["title"] = title
-        if name and hotel["name"] != name:
-            hotel["name"] = name
+        if hotel_data.title and hotel["title"] != hotel_data.title:
+            hotel["title"] = hotel_data.title
+        if hotel_data.name and hotel["name"] != hotel_data.name:
+            hotel["name"] = hotel_data.name
     return {"success": "OK"}
 
 
