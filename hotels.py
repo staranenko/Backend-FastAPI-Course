@@ -5,7 +5,7 @@ from schemas.hotels import Hotel, HotelPUTH
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 hotels = [
-    {"id": 1, "  title": "Сочи", "name": "sochi"},
+    {"id": 1, "title": "Сочи", "name": "sochi"},
     {"id": 2, "title": "Дубай", "name": "dubai"},
     {"id": 3, "title": "Мальдивы", "name": "maldivi"},
     {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
