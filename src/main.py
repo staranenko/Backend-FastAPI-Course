@@ -11,10 +11,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.hotels import router as router_hotels
-from src.config import settings
 
-
-print(f"{settings.DB_NAME=}")
+from src.database import *
 
 app = FastAPI(docs_url=None)
 
