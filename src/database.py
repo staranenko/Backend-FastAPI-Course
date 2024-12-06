@@ -7,11 +7,3 @@ from src.config import settings
 
 
 engine = create_async_engine(settings.DB_URL)
-
-
-async def func():
-    async with engine.begin() as conn:
-        res = await conn.execute(text("SELECT version()"))
-        print(res.fetchone())
-
-asyncio.run(func())
