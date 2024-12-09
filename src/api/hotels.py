@@ -1,23 +1,13 @@
 from fastapi import Query, APIRouter, Body
 
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 from src.api.dependecies import PaginationDep
-from src.database import async_session_maker, engine
+from src.database import async_session_maker
 from src.models.hotels import HotelsOrm
 from src.schemas.hotels import Hotel, HotelPUTH
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
-
-hotels = [
-    {"id": 1, "title": "Сочи", "name": "sochi"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
-    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
-    {"id": 5, "title": "Москва", "name": "moscow"},
-    {"id": 6, "title": "Казань", "name": "kazan"},
-    {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
-]
 
 
 @router.get(
@@ -25,19 +15,29 @@ hotels = [
     summary="Получить все отели",
     description="Нужно указать или номер или название или и то и другое. Для получения всех отелей параметры не заполнять.",
 )
-def get_hotels(
+async def get_hotels(
     pagination: PaginationDep,
     hotel_id: int | None = Query(None, description="Номер отеля"),
     title: str | None = Query(None, description="Название отеля"),
 ):
-    hotels_ = []
-    for hotel in hotels:
-        if hotel_id and hotel["id"] != hotel_id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
-    return hotels_[pagination.per_page * (pagination.page - 1) :][: pagination.per_page]
+    per_page = pagination.per_page or 5
+    async with async_session_maker() as session:
+        query = select(HotelsOrm)
+        if hotel_id:
+            query = query.filter_by(id=hotel_id)
+        if title:
+            query = query.filter_by(title=title)
+        query = (
+            query
+            .limit(per_page)
+            .offset(per_page * (pagination.page - 1))
+        )
+        result = await session.execute(query)
+
+        hotels = result.scalars().all()
+        return hotels
+
+    # return hotels_[pagination.per_page * (pagination.page - 1) :][: pagination.per_page]
 
 
 @router.post("")
