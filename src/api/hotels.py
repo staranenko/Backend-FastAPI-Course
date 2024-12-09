@@ -3,7 +3,7 @@ from fastapi import Query, APIRouter, Body
 from sqlalchemy import insert, select
 
 from src.api.dependecies import PaginationDep
-from src.database import async_session_maker
+from src.database import async_session_maker, engine
 from src.models.hotels import HotelsOrm
 from src.schemas.hotels import Hotel, HotelPUTH
 
@@ -17,27 +17,25 @@ router = APIRouter(prefix="/hotels", tags=["Hotels"])
 )
 async def get_hotels(
     pagination: PaginationDep,
-    hotel_id: int | None = Query(None, description="Номер отеля"),
     title: str | None = Query(None, description="Название отеля"),
+    location: str | None = Query(None, description="Расположение отеля"),
 ):
     per_page = pagination.per_page or 5
     async with async_session_maker() as session:
         query = select(HotelsOrm)
-        if hotel_id:
-            query = query.filter_by(id=hotel_id)
         if title:
-            query = query.filter_by(title=title)
+            query = query.filter(HotelsOrm.title.ilike(f'%{title}%').collate("ru_RU.UTF-8"))
+        if location:
+            query = query.filter(HotelsOrm.location.like(f'%{location}%').collate("ru_RU.UTF-8"))
         query = (
             query
             .limit(per_page)
             .offset(per_page * (pagination.page - 1))
         )
+        # print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await session.execute(query)
 
-        hotels = result.scalars().all()
-        return hotels
-
-    # return hotels_[pagination.per_page * (pagination.page - 1) :][: pagination.per_page]
+        return result.scalars().all()
 
 
 @router.post("")
@@ -47,15 +45,15 @@ async def create_hotel(
             "1": {
                 "summary": "Сочи",
                 "value": {
-                    "title": "Отель Сочи у моря",
-                    "location": "ул. Моря, 1",
+                    "title": "Благоухание лотоса",
+                    "location": "Сочи, ул. Моря, 1",
                 },
             },
             "2": {
                 "summary": "Дубай",
                 "value": {
-                    "title": "Отель Дубай у моря",
-                    "location": "ул. Шейха, 2",
+                    "title": "Luxury rest by sea",
+                    "location": "Дубай, ул. Шейха, 2",
                 },
             },
         }
