@@ -78,8 +78,8 @@ def partial_edit_hotel(hotel_id: int, hotel_data: HotelPUTH):
             continue
         if hotel_data.title and hotel["title"] != hotel_data.title:
             hotel["title"] = hotel_data.title
-        if hotel_data.name and hotel["name"] != hotel_data.name:
-            hotel["name"] = hotel_data.name
+        if hotel_data.location and hotel["name"] != hotel_data.location:
+            hotel["name"] = hotel_data.location
     return {"success": "OK"}
 
 

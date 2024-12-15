@@ -19,8 +19,10 @@ class BaseRepository:
 
         return result.scalars().one_or_none()
 
-    async def add(self, **kwargs):
-        stmt = insert(self.model).values(**kwargs)
-        result = await self.session.execute(stmt)
+    async def add(self, data: BaseModel):
+        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        result = await self.session.execute(add_data_stmt)
+
+        return result.scalars().one()
 
         return result.inserted_primary_key[0]
