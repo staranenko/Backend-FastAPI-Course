@@ -1,10 +1,8 @@
 from fastapi import Query, APIRouter, Body
 
-from sqlalchemy import insert, select, func
 
 from src.api.dependecies import PaginationDep
-from src.database import async_session_maker, engine
-from src.models.hotels import HotelsOrm
+from src.database import async_session_maker
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPUTH
 
@@ -89,15 +87,10 @@ async def edit_hotel(
 
 
 @router.patch("/{hotel_id}")
-def partial_edit_hotel(hotel_id: int, hotel_data: HotelPUTH):
-    global hotels
-    for hotel in hotels:
-        if hotel_id and hotel["id"] != hotel_id:
-            continue
-        if hotel_data.title and hotel["title"] != hotel_data.title:
-            hotel["title"] = hotel_data.title
-        if hotel_data.location and hotel["name"] != hotel_data.location:
-            hotel["name"] = hotel_data.location
+async def partial_edit_hotel(hotel_id: int, hotel_data: HotelPUTH):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
     return {"success": "OK"}
 
 
