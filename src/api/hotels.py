@@ -6,7 +6,7 @@ from src.database import async_session_maker
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPUTH, HotelAdd
 
-router = APIRouter(prefix="/hotels", tags=["Hotels"])
+router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get(
