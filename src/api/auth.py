@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 
 from passlib.context import CryptContext
 
@@ -18,7 +18,15 @@ async def register_user(
     hashed_password = pwd_context.hash(data.password)
     new_user_data = UsersAdd(email=data.email, hashed_password=hashed_password)
     async with async_session_maker() as session:
-        user = await UsersRepository(session).add(new_user_data)
+        user_exists = await UsersRepository(session).get_one_or_none(email=new_user_data.email)
+        if user_exists is not None:
+            # Возврат HTTP 409 с понятным описанием
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Пользователь с таким адресом электронной почты уже существует"
+            )
+
+        await UsersRepository(session).add(new_user_data)
         await session.commit()
 
-    return {"status": "OK"}
+    return {"status": "OK", "message": "Пользователь успешно зарегистрирован"}
