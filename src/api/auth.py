@@ -42,5 +42,5 @@ async def login_user(
 async def only_auth(
         request: Request,
 ):
-    access_token = request.cookies.get("access_token")
+    access_token = request.cookies.get("access_token", None)
     return {"access_token": access_token}
