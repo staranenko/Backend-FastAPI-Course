@@ -50,9 +50,7 @@ async def get_me(
 
 @router.post("/logout")
 async def logout_user(
-        user_id: UserIdDep,  # Похоже, что это тут не нужно, как проверка в теле метода.
         response: Response
 ):
-    if user_id is None:
-        response.delete_cookie(key="access_token")
-        return {"status": "OK"}
+    response.delete_cookie(key="access_token")
+    return {"status": "OK"}
