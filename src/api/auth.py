@@ -46,3 +46,13 @@ async def get_me(
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_one_or_none(id=user_id)
         return user
+
+
+@router.post("/logout")
+async def logout_user(
+        user_id: UserIdDep,  # Похоже, что это тут не нужно, как проверка в теле метода.
+        response: Response
+):
+    if user_id is None:
+        response.delete_cookie(key="access_token")
+        return {"status": "OK"}
